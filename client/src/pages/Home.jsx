@@ -14,7 +14,7 @@ import {
     BarChart3,
     Users,
     Zap,
-    MegaPhone
+    Megaphone
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import api from '../api';
@@ -323,7 +323,7 @@ const Home = () => {
                 <div className="card-premium p-8 lg:p-10 bg-white">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center shadow-sm">
-                            <MegaPhone size={24} />
+                            <Megaphone size={24} />
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-slate-900 font-display uppercase italic">City News</h2>

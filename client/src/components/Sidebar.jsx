@@ -36,7 +36,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     const adminLinks = [
         { name: 'Admin Insights', path: '/admin-dashboard', icon: LayoutDashboard },
         { name: 'Manage Vault', path: '/admin/manage', icon: FileText },
-        { name: 'Broadcast Node', path: '/admin/communication', icon: MegaPhone },
+        { name: 'Broadcast Node', path: '/admin/communication', icon: Megaphone },
     ];
 
     const links = userInfo?.role === 'admin' ? adminLinks : citizenLinks;

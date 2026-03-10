@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    MegaPhone,
+    Megaphone,
     Bell,
     ShieldAlert,
     MessageSquare,
@@ -133,7 +133,7 @@ const AdminCommunication = () => {
                         ) : activeTab === 'news' ? (
                             <form onSubmit={handlePostNews} className="space-y-6">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center"><MegaPhone size={20} /></div>
+                                    <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center"><Megaphone size={20} /></div>
                                     <h3 className="text-lg font-black text-slate-900 font-display uppercase tracking-tight">Post Announcement</h3>
                                 </div>
                                 <div className="space-y-4">
