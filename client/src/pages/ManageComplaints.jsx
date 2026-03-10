@@ -1,153 +1,180 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
 import {
     Search,
     Filter,
     ChevronRight,
-    AlertCircle,
-    MoreVertical,
-    Loader2,
-    Calendar,
-    User,
     MapPin,
-    CheckCircle2,
+    MessageSquare,
     Clock,
-    ExternalLink
+    CheckCircle,
+    ArrowUpRight,
+    TrendingUp,
+    AlertTriangle,
+    Zap,
+    MoreVertical,
+    Activity,
+    Layers,
+    ShieldCheck,
+    Calendar
 } from 'lucide-react';
+import api from '../api';
 
 const ManageComplaints = () => {
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('All');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
+        const fetchComplaints = async () => {
+            try {
+                const { data } = await api.get('/admin/complaints');
+                setComplaints(data);
+            } catch (error) {
+                console.error('Vault Access Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchComplaints();
     }, []);
 
-    const fetchComplaints = async () => {
-        try {
-            const { data } = await api.get('/admin/complaints');
-            setComplaints(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const filteredComplaints = complaints.filter(c => {
-        const matchesFilter = filter === 'All' || c.status === filter;
-        const matchesSearch = c.complaintId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.title.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesFilter && matchesSearch;
+    const filteredComplaints = complaints.filter((c) => {
+        const matchesStatus = filterStatus === 'all' || c.status === filterStatus;
+        const matchesSearch =
+            c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.complaintId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.user?.name && c.user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        return matchesStatus && matchesSearch;
     });
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Resolved': return 'bg-green-100 text-green-700 border-green-200';
-            case 'In Progress': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'Submitted': return 'bg-slate-100 text-slate-700 border-slate-200';
-            default: return 'bg-orange-100 text-orange-700 border-orange-200';
-        }
-    };
-
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold text-slate-900 font-primary italic">Complaint Management</h1>
-                <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
-                    {['All', 'Submitted', 'In Progress', 'Resolved'].map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setFilter(tab)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${filter === tab ? 'bg-primary-600 text-white shadow-lg shadow-primary-200' : 'text-slate-500 hover:bg-slate-50'
-                                }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-            </div>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-            {/* Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            {/* Search and Filters */}
+            <div className="card-premium p-8 lg:p-10">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-10">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-black text-slate-900 font-display tracking-tight">Incident <span className="text-primary-600">Vault</span></h1>
+                        <p className="text-slate-400 font-semibold text-sm">Managing city-wide infrastructure logs and resolution triggers.</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-1.5 flex gap-1">
+                            {['all', 'pending', 'in-progress', 'resolved'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => setFilterStatus(status)}
+                                    className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${filterStatus === status ? 'bg-white text-primary-600 shadow-sm ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                                        }`}
+                                >
+                                    {status.replace('-', ' ')}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative group">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-600 transition-colors" size={24} />
                     <input
                         type="text"
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary-500 transition-all outline-none"
-                        placeholder="Search by ID or Title..."
+                        placeholder="Universal Vault Query (Name, ID, Title)..."
+                        className="w-full h-16 pl-16 pr-8 bg-slate-50 border border-slate-100 rounded-[2rem] text-slate-900 font-bold focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:bg-white transition-all text-lg shadow-inner"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button onClick={fetchComplaints} className="btn-secondary px-6">
-                    Reload
-                </button>
             </div>
 
-            {/* Complaints List */}
-            <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
-                {loading ? (
-                    <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-primary-600" size={40} /></div>
-                ) : filteredComplaints.length === 0 ? (
-                    <div className="p-20 text-center text-slate-400 font-bold">No complaints found.</div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-200">
-                                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Complaint</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Citizen</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">Action</th>
+            {/* Table Section */}
+            <div className="card-premium overflow-hidden border-none shadow-premium">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50 border-b border-slate-100">
+                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Incident Identity</th>
+                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Subject / Node</th>
+                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Resolution Status</th>
+                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Priority Tier</th>
+                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right">Binary Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {loading ? (
+                                [1, 2, 3, 4, 5].map(i => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td colSpan="5" className="px-8 py-8"><div className="h-10 bg-slate-50 rounded-2xl shimmer"></div></td>
+                                    </tr>
+                                ))
+                            ) : filteredComplaints.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="px-8 py-32 text-center bg-slate-25/50">
+                                        <Activity className="mx-auto mb-6 text-slate-200" size={64} />
+                                        <p className="text-xl font-black text-slate-300 uppercase tracking-widest">No matching logs found in current sector</p>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {filteredComplaints.map((c) => (
-                                    <tr key={c._id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-400 transition-colors">
-                                                    <AlertCircle size={20} />
+                            ) : (
+                                filteredComplaints.map((c) => (
+                                    <tr key={c._id} className="group hover:bg-slate-25 transition-colors">
+                                        <td className="px-8 py-7">
+                                            <div className="flex flex-col">
+                                                <span className="text-base font-black text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1">{c.title}</span>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">ID: #{c.complaintId}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-7">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs">
+                                                    {c.user?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">{c.title}</p>
-                                                    <p className="text-xs font-mono text-slate-400">{c.complaintId}</p>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-700">{c.user?.name || 'Unknown'}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 truncate max-w-[120px]">{c.user?.email || 'N/A'}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                                                <User size={14} className="text-slate-400" />
-                                                {c.user?.name}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-semibold text-slate-600">{c.category}</span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-4 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(c.status)}`}>
+                                        <td className="px-8 py-7">
+                                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${c.status === 'resolved' ? 'bg-green-50 border-green-100 text-green-600' :
+                                                    c.status === 'in-progress' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-slate-50 border-slate-100 text-slate-400'
+                                                }`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${c.status === 'resolved' ? 'bg-green-500 animate-pulse' :
+                                                        c.status === 'in-progress' ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'
+                                                    }`}></div>
                                                 {c.status}
-                                            </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-8 py-7">
+                                            <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest ${c.urgency === 'high' ? 'text-red-600' :
+                                                    c.urgency === 'medium' ? 'text-amber-500' : 'text-slate-400'
+                                                }`}>
+                                                <ShieldCheck size={14} />
+                                                {c.urgency || 'Normal'}
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-7 text-right">
                                             <Link
                                                 to={`/admin/complaint/${c._id}`}
-                                                className="p-2 border border-slate-100 rounded-xl hover:bg-white hover:shadow-lg transition-all inline-flex items-center gap-2 text-primary-600 font-bold text-xs"
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-50 text-primary-600 rounded-xl hover:bg-primary-600 hover:text-white transition-all font-bold text-xs"
                                             >
-                                                Detail <ChevronRight size={14} />
+                                                Detailed Analysis
+                                                <ChevronRight size={14} />
                                             </Link>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-between items-center whitespace-nowrap overflow-hidden">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Displaying {filteredComplaints.length} anomalous logs</p>
+                    <div className="flex gap-2">
+                        {[1, 2, 3].map(i => (
+                            <button key={i} className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${i === 1 ? 'bg-primary-600 text-white' : 'bg-white border border-slate-100 text-slate-400 hover:bg-slate-50'}`}>{i}</button>
+                        ))}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

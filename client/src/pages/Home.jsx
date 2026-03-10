@@ -1,122 +1,271 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
     PlusCircle,
     Search,
-    CheckCircle2,
+    AlertTriangle,
+    CheckCircle,
     Clock,
-    AlertCircle,
     ArrowRight,
-    ShieldCheck,
-    Zap,
-    PhoneCall
+    TrendingUp,
+    MapPin,
+    MessageSquare,
+    ShieldAlert,
+    BarChart3,
+    Users,
+    Zap
 } from 'lucide-react';
+import { Line } from 'react-chartjs-2';
+import api from '../api';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+} from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
 
 const Home = () => {
+    const [complaints, setComplaints] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUserComplaints = async () => {
+            try {
+                const { data } = await api.get('/complaints/my');
+                setComplaints(data);
+            } catch (error) {
+                console.error('Sequence Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUserComplaints();
+    }, []);
+
     const stats = [
-        { label: 'Solved Issues', value: '1,240+', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-100' },
-        { label: 'Avg. Resolution', value: '48 Hours', icon: Zap, color: 'text-primary-600', bg: 'bg-primary-100' },
-        { label: 'Satisfaction', value: '98%', icon: ShieldCheck, color: 'text-blue-600', bg: 'bg-blue-100' },
+        { label: 'Live Submissions', value: complaints.length, icon: MessageSquare, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Resolving', value: complaints.filter(c => c.status === 'in-progress').length, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
+        { label: 'Completed', value: complaints.filter(c => c.status === 'resolved').length, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+        { label: 'Critical Node', value: complaints.filter(c => c.urgency === 'high').length, icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
     ];
 
-    const features = [
-        { title: 'Easy Reporting', desc: 'Report issues with photos and locations in seconds.', icon: PlusCircle },
-        { title: 'AI Categorization', desc: 'Our smart system routes complaints automatically.', icon: Zap },
-        { title: 'Real-time Tracking', desc: 'Stay updated on every step of the resolution.', icon: Search },
-    ];
+    const chartData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+            {
+                label: 'Resolution Rate (%)',
+                data: [65, 78, 72, 85, 92, 88, 95],
+                fill: true,
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                borderColor: '#0ea5e9',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderWidth: 2,
+                tension: 0.4,
+            }
+        ]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 12,
+                titleFont: { size: 14, weight: 'bold' },
+                bodyFont: { size: 13 },
+                usePointStyle: true,
+            }
+        },
+        scales: {
+            y: { display: false },
+            x: { grid: { display: false }, border: { display: false } }
+        }
+    };
 
     return (
-        <div className="space-y-12 pb-12">
-            {/* Hero Section */}
-            <section className="relative overflow-hidden rounded-[2rem] bg-slate-900 text-white p-8 lg:p-12 shadow-2xl">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-primary-600/10 blur-[100px] -z-0"></div>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+            {/* Hero Welcome */}
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 px-8 py-16 lg:p-20 text-white shadow-2xl">
+                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary-600/20 to-transparent"></div>
+                <div className="absolute -right-20 -top-20 w-80 h-80 bg-primary-600/30 rounded-full blur-[120px]"></div>
                 <div className="relative z-10 max-w-2xl">
-                    <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                        Building a <span className="text-primary-400">Smater, Cleaner</span> City Together.
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10 mb-6 group cursor-default">
+                        <Zap size={16} className="text-secondary-400 group-hover:scale-125 transition-transform" />
+                        <span className="text-xs font-bold tracking-widest uppercase">System Optimal v2.0</span>
+                    </div>
+                    <h1 className="text-4xl lg:text-6xl font-extrabold font-display leading-[1.1] mb-6">
+                        Your Gateway to a <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400 font-black italic">
+                            Smarter City.
+                        </span>
                     </h1>
-                    <p className="text-slate-400 text-lg mb-10 leading-relaxed">
-                        Report civic issues, track progress, and help our municipal team resolve
-                        grievances efficiently. Your voice matters in making our city better.
+                    <p className="text-lg text-slate-300 mb-10 max-w-lg leading-relaxed font-medium">
+                        Securely report incidents, monitor city infrastructure, and track resolution sequences in real-time. Direct communication with municipal authorities.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <Link to="/submit" className="btn-primary py-4 px-8 text-lg flex items-center justify-center gap-2">
-                            Report an Issue <ArrowRight size={20} />
+                    <div className="flex flex-wrap gap-4">
+                        <Link to="/submit" className="btn-primary">
+                            <PlusCircle size={20} />
+                            Initiate New Report
                         </Link>
-                        <Link to="/track" className="btn-secondary py-4 px-8 text-lg border-slate-700 bg-slate-800 text-white hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
-                            Track Status <Search size={20} />
+                        <Link to="/track" className="btn-secondary !bg-white/10 !border-white/10 !text-white hover:!bg-white/20">
+                            <Search size={20} />
+                            Access tracking Vault
                         </Link>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* Stats Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Stats Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <div key={i} className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 card-hover">
-                        <div className={`${stat.bg} ${stat.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-6`}>
-                            <stat.icon size={28} />
+                    <div key={i} className="card-premium p-8 group relative overflow-hidden">
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-slate-50 rounded-full transition-transform group-hover:scale-150"></div>
+                        <div className="relative z-10">
+                            <div className={`${stat.bg} ${stat.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm`}>
+                                <stat.icon size={26} />
+                            </div>
+                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">{stat.label}</p>
+                            <h3 className="text-3xl font-black text-slate-900">{stat.value}</h3>
                         </div>
-                        <p className="text-slate-500 font-bold uppercase tracking-wider text-sm mb-1">{stat.label}</p>
-                        <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
                     </div>
                 ))}
             </div>
 
-            {/* Features Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {features.map((feature, i) => (
-                    <div key={i} className="flex gap-6 p-4">
-                        <div className="shrink-0 w-12 h-12 rounded-xl bg-white shadow-lg flex items-center justify-center text-primary-600 border border-slate-100">
-                            <feature.icon size={24} />
-                        </div>
+                {/* Recent Reports */}
+                <div className="lg:col-span-2 card-premium p-8 lg:p-10 flex flex-col">
+                    <div className="flex justify-between items-center mb-10">
                         <div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">{feature.title}</h3>
-                            <p className="text-slate-500 leading-relaxed">{feature.desc}</p>
+                            <h2 className="text-2xl font-black text-slate-900 font-display">Recent Operations</h2>
+                            <p className="text-slate-500 text-sm font-semibold">Live feed of your reported sequences</p>
                         </div>
+                        <Link to="/track" className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline">
+                            View All Vault <ArrowRight size={16} />
+                        </Link>
+                    </div>
+
+                    <div className="space-y-4 flex-1">
+                        {loading ? (
+                            [1, 2, 3].map(i => (
+                                <div key={i} className="h-20 bg-slate-50 rounded-3xl shimmer"></div>
+                            ))
+                        ) : complaints.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
+                                <MessageSquare size={48} className="text-slate-200 mb-4" />
+                                <p className="text-slate-400 font-bold uppercase tracking-widest text-sm text-center">No Data in Local Vault</p>
+                            </div>
+                        ) : (
+                            complaints.slice(0, 4).map((c) => (
+                                <Link
+                                    key={c._id}
+                                    to={`/track?id=${c.complaintId}`}
+                                    className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[1.5rem] hover:shadow-xl hover:border-primary-100 transition-all group"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                                            <MapPin size={22} />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1">{c.title}</p>
+                                            <p className="text-xs font-bold text-slate-400 tracking-wider">ID: #{c.complaintId}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <div className="hidden sm:block text-right">
+                                            <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${c.status === 'resolved' ? 'text-green-500' :
+                                                    c.status === 'in-progress' ? 'text-amber-500' : 'text-slate-400'
+                                                }`}>
+                                                {c.status}
+                                            </p>
+                                            <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                <div className={`h-full ${c.status === 'resolved' ? 'w-full bg-green-500' :
+                                                        c.status === 'in-progress' ? 'w-1/2 bg-amber-500' : 'w-1/4 bg-slate-300'
+                                                    }`}></div>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" size={20} />
+                                    </div>
+                                </Link>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* City Analytics Widget */}
+                <div className="card-premium p-8 lg:p-10 bg-gradient-to-br from-primary-600 to-primary-800 border-none text-white relative overflow-hidden group">
+                    <div className="absolute -right-20 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                    <div className="relative z-10 h-full flex flex-col">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                                <TrendingUp size={22} />
+                            </div>
+                            <h2 className="text-xl font-bold font-display leading-tight">Infrastructure Efficiency</h2>
+                        </div>
+
+                        <div className="flex-1 min-h-[220px]">
+                            <Line data={chartData} options={chartOptions} />
+                        </div>
+
+                        <div className="mt-8 pt-8 border-t border-white/10">
+                            <div className="flex justify-between items-center px-2">
+                                <div className="text-center">
+                                    <p className="text-[10px] uppercase font-bold text-white/60 tracking-widest mb-1">Density</p>
+                                    <p className="text-2xl font-black italic tracking-tighter">0.82</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-[10px] uppercase font-bold text-white/60 tracking-widest mb-1">Response</p>
+                                    <p className="text-2xl font-black italic tracking-tighter">94%</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-[10px] uppercase font-bold text-white/60 tracking-widest mb-1">Rating</p>
+                                    <p className="text-2xl font-black italic tracking-tighter">A+</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Featured Service Grid */}
+            <div className="grid md:grid-cols-3 gap-6">
+                {[
+                    { icon: ShieldAlert, title: 'Rapid Response', desc: 'Direct emergency link to municipal safety units.', color: 'from-orange-500 to-red-500' },
+                    { icon: BarChart3, title: 'Data Integrity', desc: 'Verified status updates through decentralized tracking.', color: 'from-blue-500 to-indigo-500' },
+                    { icon: Users, title: 'Citizen Voice', desc: 'Direct democratic engagement in city prioritization.', color: 'from-emerald-500 to-teal-500' }
+                ].map((tool, i) => (
+                    <div key={i} className="card-premium p-8 group overflow-hidden">
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white mb-6 shadow-lg shadow-black/10 transition-transform group-hover:rotate-6`}>
+                            <tool.icon size={24} />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 mb-3 tracking-tight">{tool.title}</h3>
+                        <p className="text-sm text-slate-500 font-semibold leading-relaxed mb-6">{tool.desc}</p>
+                        <button className="text-xs font-black uppercase text-slate-400 group-hover:text-primary-600 tracking-[0.2em] flex items-center gap-2 transition-colors">
+                            Explore Hub <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
+                        </button>
                     </div>
                 ))}
             </div>
 
-            {/* Categories Guide */}
-            <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-xl shadow-slate-200 border border-slate-100">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-2xl flex items-center justify-center shrink-0">
-                        <AlertCircle size={24} />
-                    </div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-slate-900">Issue Categories</h2>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {['Road & Infrastructure', 'Water & Sewage', 'Garbage & Waste', 'Power & Lighting'].map(cat => (
-                        <div key={cat} className="p-6 rounded-2xl bg-slate-50 border border-slate-100 border-dashed text-center hover:border-solid hover:border-primary-300 hover:bg-primary-50 transition-all cursor-default">
-                            <p className="font-bold text-slate-700">{cat}</p>
-                            <p className="text-xs text-slate-400 mt-1 uppercase font-bold">Priority Dept</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="bg-primary-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-primary-200">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-                        <PhoneCall size={32} />
-                    </div>
-                    <div>
-                        <h3 className="text-2xl font-bold">Emergency Helplines</h3>
-                        <p className="text-primary-100">Available 24/7 for life-threatening situations.</p>
-                    </div>
-                </div>
-                <div className="flex gap-4">
-                    <div className="text-center px-6 py-3 bg-white/10 rounded-2xl backdrop-blur border border-white/20">
-                        <p className="text-xs font-bold uppercase opacity-60">Control Room</p>
-                        <p className="text-xl font-bold">100 / 112</p>
-                    </div>
-                    <div className="text-center px-6 py-3 bg-white/10 rounded-2xl backdrop-blur border border-white/20">
-                        <p className="text-xs font-bold uppercase opacity-60">Fire Station</p>
-                        <p className="text-xl font-bold">101</p>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
