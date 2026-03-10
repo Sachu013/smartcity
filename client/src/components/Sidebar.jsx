@@ -13,7 +13,8 @@ import {
     Home,
     ShieldCheck,
     LifeBuoy,
-    ChevronRight
+    ChevronRight,
+    Megaphone
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
