@@ -1,4 +1,6 @@
-const express = require('express');
+import os
+
+content = """const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
@@ -29,3 +31,18 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log('Server running on port ' + PORT);
 });
+"""
+
+env_content = """PORT=5000
+MONGODB_URI=mongodb://localhost:27017/smartcity
+JWT_SECRET=your_super_secret_key_here
+NODE_ENV=development
+"""
+
+with open('server.js', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+with open('.env', 'w', encoding='utf-8') as f:
+    f.write(env_content)
+
+print("Files written successfully in UTF-8")
