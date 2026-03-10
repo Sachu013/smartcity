@@ -14,7 +14,10 @@ import {
     BarChart3,
     Users,
     Zap,
-    Megaphone
+    Megaphone,
+    ChevronRight,
+    Loader2,
+    Send
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import api from '../api';
