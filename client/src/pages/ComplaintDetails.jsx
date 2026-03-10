@@ -28,10 +28,11 @@ const ComplaintDetails = () => {
     const [formData, setFormData] = useState({
         status: '',
         assignedDepartment: '',
-        urgency: ''
+        urgency: '',
+        adminResponse: ''
     });
 
-    const departments = ['Engineering', 'Health', 'Logistics', 'Security', 'Energy', 'Other'];
+    const departments = ['Sanitation Department', 'Public Works Department', 'Water Supply Department', 'Power Department', 'Electrical Department', 'General Administration'];
 
     useEffect(() => {
         const fetchComplaint = async () => {
@@ -42,7 +43,8 @@ const ComplaintDetails = () => {
                 setFormData({
                     status: found.status,
                     assignedDepartment: found.assignedDepartment || '',
-                    urgency: found.urgency || 'low'
+                    urgency: found.urgency || 'Medium',
+                    adminResponse: found.adminResponse || ''
                 });
             } catch (error) {
                 console.error('Data Fetch Error:', error);
@@ -59,7 +61,7 @@ const ComplaintDetails = () => {
         try {
             await api.put(`/admin/complaints/${id}`, formData);
             alert('Operational parameters synchronized successfully.');
-            navigate('/admin/manage');
+            navigate('/admin-dashboard');
         } catch (error) {
             alert('Synchronization Error: Parameter update failed.');
         } finally {
@@ -209,9 +211,9 @@ const ComplaintDetails = () => {
                                     value={formData.status}
                                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                                 >
-                                    <option value="pending">PENDING ANALYSIS</option>
-                                    <option value="in-progress">IN-PROGRESS RESOLUTION</option>
-                                    <option value="resolved">DEPLOYED RESOLUTION (COMPLETED)</option>
+                                    <option value="Pending">PENDING ANALYSIS</option>
+                                    <option value="In Progress">IN-PROGRESS RESOLUTION</option>
+                                    <option value="Resolved">DEPLOYED RESOLUTION (COMPLETED)</option>
                                 </select>
                             </div>
 
@@ -224,7 +226,7 @@ const ComplaintDetails = () => {
                                 >
                                     <option value="">INITIALIZE ROUTING...</option>
                                     {departments.map((dept) => (
-                                        <option key={dept} value={dept}>{dept.toUpperCase()} UNIT</option>
+                                        <option key={dept} value={dept}>{dept.toUpperCase()}</option>
                                     ))}
                                 </select>
                             </div>
@@ -232,20 +234,30 @@ const ComplaintDetails = () => {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Priority Calibration</label>
                                 <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
-                                    {['low', 'medium', 'high'].map((level) => (
+                                    {['Low', 'Medium', 'High'].map((level) => (
                                         <button
                                             key={level}
                                             type="button"
                                             onClick={() => setFormData({ ...formData, urgency: level })}
                                             className={`py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.urgency === level
-                                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-100'
-                                                    : 'text-slate-400 hover:text-slate-600'
+                                                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-100'
+                                                : 'text-slate-400 hover:text-slate-600'
                                                 }`}
                                         >
                                             {level}
                                         </button>
                                     ))}
                                 </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Official Transmission (Feedback)</label>
+                                <textarea
+                                    className="w-full h-32 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:text-slate-300"
+                                    placeholder="Enter formal response to citizen..."
+                                    value={formData.adminResponse}
+                                    onChange={(e) => setFormData({ ...formData, adminResponse: e.target.value })}
+                                />
                             </div>
 
                             <button

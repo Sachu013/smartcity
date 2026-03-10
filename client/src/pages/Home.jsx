@@ -13,7 +13,8 @@ import {
     ShieldAlert,
     BarChart3,
     Users,
-    Zap
+    Zap,
+    MegaPhone
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import api from '../api';
@@ -42,27 +43,53 @@ ChartJS.register(
 
 const Home = () => {
     const [complaints, setComplaints] = useState([]);
+    const [alerts, setAlerts] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const [feedbackForm, setFeedbackForm] = useState({ rating: 5, category: 'App Experience', comment: '' });
+    const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
     useEffect(() => {
-        const fetchUserComplaints = async () => {
+        const fetchData = async () => {
             try {
-                const { data } = await api.get('/complaints/my');
-                setComplaints(data);
+                const [compRes, alertRes, newsRes] = await Promise.all([
+                    api.get('/complaints/my'),
+                    api.get('/alerts'),
+                    api.get('/announcements')
+                ]);
+                setComplaints(compRes.data);
+                setAlerts(alertRes.data);
+                setAnnouncements(newsRes.data);
             } catch (error) {
                 console.error('Sequence Error:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchUserComplaints();
+        fetchData();
     }, []);
 
+    const handleFeedbackSubmit = async (e) => {
+        e.preventDefault();
+        setSubmittingFeedback(true);
+        try {
+            await api.post('/feedback', feedbackForm);
+            alert('Feedback transmitted successfully. Thank you for your contribution!');
+            setShowFeedback(false);
+            setFeedbackForm({ rating: 5, category: 'App Experience', comment: '' });
+        } catch (error) {
+            alert('Binary transmission failure. Please retry.');
+        } finally {
+            setSubmittingFeedback(false);
+        }
+    };
+
     const stats = [
-        { label: 'Live Submissions', value: complaints.length, icon: MessageSquare, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { label: 'Resolving', value: complaints.filter(c => c.status === 'in-progress').length, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
-        { label: 'Completed', value: complaints.filter(c => c.status === 'resolved').length, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-        { label: 'Critical Node', value: complaints.filter(c => c.urgency === 'high').length, icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
+        { label: 'Total Complaints', value: complaints.length, icon: MessageSquare, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Pending Complaints', value: complaints.filter(c => c.status === 'Pending').length, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
+        { label: 'Resolved Complaints', value: complaints.filter(c => c.status === 'Resolved').length, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+        { label: 'Critical Node', value: complaints.filter(c => c.urgency === 'High').length, icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
     ];
 
     const chartData = {
@@ -193,13 +220,13 @@ const Home = () => {
                                     <div className="flex items-center gap-6">
                                         <div className="hidden sm:block text-right">
                                             <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${c.status === 'resolved' ? 'text-green-500' :
-                                                    c.status === 'in-progress' ? 'text-amber-500' : 'text-slate-400'
+                                                c.status === 'in-progress' ? 'text-amber-500' : 'text-slate-400'
                                                 }`}>
                                                 {c.status}
                                             </p>
                                             <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                 <div className={`h-full ${c.status === 'resolved' ? 'w-full bg-green-500' :
-                                                        c.status === 'in-progress' ? 'w-1/2 bg-amber-500' : 'w-1/4 bg-slate-300'
+                                                    c.status === 'in-progress' ? 'w-1/2 bg-amber-500' : 'w-1/4 bg-slate-300'
                                                     }`}></div>
                                             </div>
                                         </div>
@@ -246,12 +273,126 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Featured Service Grid */}
+            {/* Nearby Alerts & Announcements */}
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* Nearby Alerts */}
+                <div className="lg:col-span-2 card-premium p-8 lg:p-10">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
+                                <ShieldAlert size={24} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-900 font-display uppercase italic">Critical Alerts</h2>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Real-time hazard telemetry</p>
+                            </div>
+                        </div>
+                        <span className="px-4 py-1.5 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse">Live</span>
+                    </div>
+
+                    <div className="space-y-4">
+                        {alerts.length === 0 ? (
+                            <div className="p-10 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200 text-center">
+                                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active alerts in current sector</p>
+                            </div>
+                        ) : (
+                            alerts.slice(0, 3).map((alert, i) => (
+                                <div key={i} className={`p-6 rounded-[1.5rem] border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group transition-all ${alert.severity === 'Critical' ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'}`}>
+                                    <div className="flex gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${alert.severity === 'Critical' ? 'bg-rose-100 text-rose-600' : 'bg-white text-primary-600 shadow-sm'}`}>
+                                            <AlertTriangle size={20} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-extrabold text-slate-900 group-hover:text-rose-600 transition-colors">{alert.title}</h4>
+                                            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
+                                                <MapPin size={12} className="text-primary-500" />
+                                                {alert.area}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${alert.severity === 'Critical' ? 'bg-rose-600 text-white shadow-lg shadow-rose-200' : 'bg-white border border-slate-100 text-slate-500'}`}>
+                                        {alert.severity}
+                                    </span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* City Announcements */}
+                <div className="card-premium p-8 lg:p-10 bg-white">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center shadow-sm">
+                            <MegaPhone size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-900 font-display uppercase italic">City News</h2>
+                            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Official announcements</p>
+                        </div>
+                    </div>
+                    <div className="space-y-6">
+                        {announcements.length === 0 ? (
+                            <div className="text-center py-10 opacity-50">
+                                <p className="text-xs font-bold uppercase tracking-widest">Quiet in the city today...</p>
+                            </div>
+                        ) : (
+                            announcements.slice(0, 3).map((news, i) => (
+                                <div key={i} className="group cursor-pointer">
+                                    <p className="text-[10px] font-black text-primary-500 uppercase tracking-widest mb-1">{news.category}</p>
+                                    <h4 className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-tight mb-2">{news.title}</h4>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{new Date(news.createdAt).toLocaleDateString()}</p>
+                                    {i < Math.min(announcements.length, 3) - 1 && <div className="mt-6 border-b border-slate-50" />}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Nearby Emergency Services */}
+            <div className="space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1">
+                        <h2 className="text-3xl font-black text-slate-900 font-display tracking-tight uppercase italic">Nearby <span className="text-primary-600">Services</span></h2>
+                        <p className="text-slate-500 font-bold tracking-widest text-[10px] uppercase">Immediate response infrastructure in your perimeter</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[
+                        { title: 'City Hospital', category: 'Health', distance: '0.8km', status: 'Operational', icon: Users, color: 'text-rose-600', bg: 'bg-rose-50' },
+                        { title: 'Police Sector 4', category: 'Security', distance: '1.2km', status: 'Optimal', icon: ShieldAlert, color: 'text-blue-600', bg: 'bg-blue-50' },
+                        { title: 'Fire Response Unit', category: 'Emergency', distance: '2.5km', status: 'Active', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
+                    ].map((svc, i) => (
+                        <div key={i} className="card-premium p-10 group relative overflow-hidden transition-all hover:-translate-y-2">
+                            <div className={`absolute top-0 right-0 w-32 h-32 ${svc.bg} rounded-bl-[5rem] translate-x-10 -translate-y-10 group-hover:scale-125 transition-transform`}></div>
+                            <div className="relative z-10">
+                                <div className={`${svc.bg} ${svc.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:rotate-6 transition-transform`}>
+                                    <svc.icon size={32} />
+                                </div>
+                                <div className="space-y-1 mb-6">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{svc.category}</p>
+                                    <h4 className="text-2xl font-black text-slate-900 font-display tracking-tight">{svc.title}</h4>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-slate-50 pt-6">
+                                    <div className="flex items-center gap-2">
+                                        <MapPin size={14} className="text-primary-600" />
+                                        <span className="text-sm font-black text-slate-900 italic tracking-tighter">{svc.distance}</span>
+                                    </div>
+                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{svc.status}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Featured Service Grid and Feedback Section */}
             <div className="grid md:grid-cols-3 gap-6">
                 {[
                     { icon: ShieldAlert, title: 'Rapid Response', desc: 'Direct emergency link to municipal safety units.', color: 'from-orange-500 to-red-500' },
                     { icon: BarChart3, title: 'Data Integrity', desc: 'Verified status updates through decentralized tracking.', color: 'from-blue-500 to-indigo-500' },
-                    { icon: Users, title: 'Citizen Voice', desc: 'Direct democratic engagement in city prioritization.', color: 'from-emerald-500 to-teal-500' }
+                    { icon: Users, title: 'Citizen Voice', desc: 'Direct democratic engagement in city prioritization.', color: 'from-emerald-500 to-teal-500', action: () => setShowFeedback(true) }
                 ].map((tool, i) => (
                     <div key={i} className="card-premium p-8 group overflow-hidden">
                         <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white mb-6 shadow-lg shadow-black/10 transition-transform group-hover:rotate-6`}>
@@ -259,12 +400,79 @@ const Home = () => {
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3 tracking-tight">{tool.title}</h3>
                         <p className="text-sm text-slate-500 font-semibold leading-relaxed mb-6">{tool.desc}</p>
-                        <button className="text-xs font-black uppercase text-slate-400 group-hover:text-primary-600 tracking-[0.2em] flex items-center gap-2 transition-colors">
-                            Explore Hub <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
+                        <button
+                            onClick={tool.action}
+                            className="text-xs font-black uppercase text-slate-400 group-hover:text-primary-600 tracking-[0.2em] flex items-center gap-2 transition-colors"
+                        >
+                            {tool.action ? 'Submit Feedback' : 'Explore Hub'} <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
                         </button>
                     </div>
                 ))}
             </div>
+
+            {/* Feedback Modal */}
+            {showFeedback && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-10 shadow-2xl relative animate-in zoom-in-95 duration-300">
+                        <button onClick={() => setShowFeedback(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-600">
+                            <Zap size={24} className="rotate-45" />
+                        </button>
+                        <h2 className="text-2xl font-black text-slate-900 font-display mb-2">Public Sentiment Node</h2>
+                        <p className="text-slate-500 font-bold tracking-widest text-[10px] uppercase mb-8">Transmit your experience to the municipal council</p>
+
+                        <form onSubmit={handleFeedbackSubmit} className="space-y-6">
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Service Rating</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setFeedbackForm({ ...feedbackForm, rating: star })}
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg transition-all ${feedbackForm.rating >= star ? 'bg-amber-100 text-amber-600 shadow-sm' : 'bg-slate-50 text-slate-300'}`}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Feedback Category</label>
+                                <select
+                                    className="input-field"
+                                    value={feedbackForm.category}
+                                    onChange={e => setFeedbackForm({ ...feedbackForm, category: e.target.value })}
+                                >
+                                    <option value="App Experience">APP EXPERIENCE</option>
+                                    <option value="City Services">CITY SERVICES</option>
+                                    <option value="Infrastructure">INFRASTRUCTURE</option>
+                                    <option value="Other">OTHER</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Operational Comments</label>
+                                <textarea
+                                    placeholder="DETAILED FEEDBACK PAYLOAD..."
+                                    className="input-field h-32"
+                                    value={feedbackForm.comment}
+                                    onChange={e => setFeedbackForm({ ...feedbackForm, comment: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={submittingFeedback}
+                                className="w-full h-16 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2"
+                            >
+                                {submittingFeedback ? <Loader2 className="animate-spin" size={20} /> : <><Send size={18} /> Transmit Evaluation</>}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

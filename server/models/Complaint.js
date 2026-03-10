@@ -13,22 +13,17 @@ const complaintSchema = mongoose.Schema(
         category: {
             type: String,
             required: true,
-            enum: ['Road', 'Water', 'Waste', 'Electricity', 'Other'],
+            enum: ['Garbage', 'Road Damage', 'Water Leakage', 'Electricity', 'Street Light', 'Other'],
         },
         imageUrl: { type: String },
         location: { type: String, required: true },
         status: {
             type: String,
             required: true,
-            enum: [
-                'Submitted',
-                'Under Review',
-                'Assigned to Department',
-                'In Progress',
-                'Resolved',
-            ],
-            default: 'Submitted',
+            enum: ['Pending', 'In Progress', 'Resolved'],
+            default: 'Pending',
         },
+        adminResponse: { type: String },
         assignedDepartment: { type: String },
         urgency: {
             type: String,

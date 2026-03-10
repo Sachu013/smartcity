@@ -27,14 +27,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     };
 
     const citizenLinks = [
-        { name: 'Overview', path: '/', icon: Home },
+        { name: 'Overview', path: '/citizen-dashboard', icon: Home },
         { name: 'Report Issue', path: '/submit', icon: PlusCircle },
         { name: 'Track Status', path: '/track', icon: Search },
+        { name: 'Identity Node', path: '/profile', icon: User },
     ];
 
     const adminLinks = [
-        { name: 'Admin Insights', path: '/admin', icon: LayoutDashboard },
+        { name: 'Admin Insights', path: '/admin-dashboard', icon: LayoutDashboard },
         { name: 'Manage Vault', path: '/admin/manage', icon: FileText },
+        { name: 'Broadcast Node', path: '/admin/communication', icon: MegaPhone },
     ];
 
     const links = userInfo?.role === 'admin' ? adminLinks : citizenLinks;
@@ -51,7 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
             <aside className={`fixed top-0 left-0 h-full w-72 bg-white border-r border-slate-100 z-50 transition-all duration-500 lg:translate-x-0 ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
                 <div className="p-8">
-                    <Link to="/" className="flex items-center gap-3 group">
+                    <Link to="/citizen-dashboard" className="flex items-center gap-3 group">
                         <div className="w-10 h-10 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-200 group-hover:rotate-12 transition-transform">
                             <ShieldCheck className="text-white" size={24} />
                         </div>
@@ -75,8 +77,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                                     key={link.path}
                                     to={link.path}
                                     className={`flex items-center justify-between group px-4 py-3.5 rounded-2xl transition-all duration-300 ${location.pathname === link.path
-                                            ? 'bg-primary-600 text-white shadow-xl shadow-primary-200 translate-x-1'
-                                            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                        ? 'bg-primary-600 text-white shadow-xl shadow-primary-200 translate-x-1'
+                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                         }`}
                                     onClick={() => isOpen && toggleSidebar()}
                                 >

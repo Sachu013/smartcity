@@ -43,7 +43,7 @@ const Login = () => {
             } else {
                 await login(formData.email, formData.password);
             }
-            navigate(formData.role === 'admin' ? '/admin' : '/');
+            navigate(formData.role === 'admin' ? '/admin-dashboard' : '/citizen-dashboard');
         } catch (err) {
             setError(err.response?.data?.message || 'Authentication sequence failed. Check credentials.');
         } finally {
@@ -117,6 +117,32 @@ const Login = () => {
                                 {error}
                             </div>
                         )}
+
+                        {/* Demo Shortcuts */}
+                        <div className="mb-8 grid grid-cols-2 gap-4">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setFormData({ ...formData, email: 'citizen@test.com', password: '123456', role: 'citizen' });
+                                    setIsRegister(false);
+                                }}
+                                className="flex flex-col items-center gap-2 p-4 bg-primary-50 border border-primary-100 rounded-2xl hover:bg-primary-100 transition-all group"
+                            >
+                                <User className="text-primary-600 group-hover:scale-110 transition-transform" size={24} />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-primary-700">Demo Citizen</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setFormData({ ...formData, email: 'admin@test.com', password: '123456', role: 'admin' });
+                                    setIsRegister(false);
+                                }}
+                                className="flex flex-col items-center gap-2 p-4 bg-secondary-50 border border-secondary-100 rounded-2xl hover:bg-secondary-100 transition-all group"
+                            >
+                                <ShieldCheck className="text-secondary-600 group-hover:scale-110 transition-transform" size={24} />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-secondary-700">Demo Admin</span>
+                            </button>
+                        </div>
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {isRegister && (

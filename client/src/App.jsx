@@ -9,6 +9,8 @@ import TrackComplaint from './pages/TrackComplaint';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageComplaints from './pages/ManageComplaints';
 import ComplaintDetails from './pages/ComplaintDetails';
+import Profile from './pages/Profile';
+import AdminCommunication from './pages/AdminCommunication';
 
 // Pages placeholders (none left!)
 
@@ -23,17 +25,19 @@ const App = () => {
       <Route element={userInfo ? <Layout /> : <Navigate to="/login" />}>
         {userInfo?.role === 'admin' ? (
           <>
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin/manage" element={<ManageComplaints />} />
             <Route path="/admin/complaint/:id" element={<ComplaintDetails />} />
-            <Route path="*" element={<Navigate to="/admin" />} />
+            <Route path="/admin/communication" element={<AdminCommunication />} />
+            <Route path="*" element={<Navigate to="/admin-dashboard" />} />
           </>
         ) : (
           <>
-            <Route path="/" element={<Home />} />
+            <Route path="/citizen-dashboard" element={<Home />} />
             <Route path="/submit" element={<SubmitComplaint />} />
             <Route path="/track" element={<TrackComplaint />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<Navigate to="/citizen-dashboard" />} />
           </>
         )}
       </Route>

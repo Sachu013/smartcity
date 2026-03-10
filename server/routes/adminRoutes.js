@@ -14,7 +14,6 @@ router.get('/complaints', protect, admin, async (req, res) => {
     }
 });
 
-// @desc    Update complaint status/department
 // @route   PUT /api/admin/complaints/:id
 router.put('/complaints/:id', protect, admin, async (req, res) => {
     try {
@@ -23,6 +22,7 @@ router.put('/complaints/:id', protect, admin, async (req, res) => {
         if (complaint) {
             complaint.status = req.body.status || complaint.status;
             complaint.assignedDepartment = req.body.assignedDepartment || complaint.assignedDepartment;
+            complaint.adminResponse = req.body.adminResponse || complaint.adminResponse;
             complaint.urgency = req.body.urgency || complaint.urgency;
 
             const updatedComplaint = await complaint.save();
@@ -40,18 +40,30 @@ router.put('/complaints/:id', protect, admin, async (req, res) => {
 router.get('/metrics', protect, admin, async (req, res) => {
     try {
         const total = await Complaint.countDocuments({});
-        const pending = await Complaint.countDocuments({ status: { $ne: 'Resolved' } });
+        const pending = await Complaint.countDocuments({ status: 'Pending' });
+        const inProgress = await Complaint.countDocuments({ status: 'In Progress' });
         const resolved = await Complaint.countDocuments({ status: 'Resolved' });
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const newToday = await Complaint.countDocuments({ createdAt: { $gte: startOfDay } });
 
         const categoryStats = await Complaint.aggregate([
             { $group: { _id: '$category', count: { $sum: 1 } } }
         ]);
 
+        const statusStats = await Complaint.aggregate([
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+        ]);
+
         res.json({
             total,
             pending,
+            inProgress,
             resolved,
-            categoryStats
+            newToday,
+            categoryStats,
+            statusStats
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

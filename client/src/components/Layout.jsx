@@ -9,11 +9,12 @@ const Layout = () => {
 
     const getPageTitle = () => {
         const path = location.pathname;
-        if (path === '/') return 'Overview';
+        if (path === '/citizen-dashboard') return 'Overview';
         if (path === '/submit') return 'Report Incident';
         if (path === '/track') return 'Tracking Vault';
-        if (path === '/admin') return 'Command Center';
+        if (path === '/admin-dashboard') return 'Command Center';
         if (path === '/admin/manage') return 'Incident Vault';
+        if (path === '/profile') return 'Identity Node';
         if (path.includes('/admin/complaint/')) return 'Incident Detailed Analysis';
         return 'SmartCity Portal';
     };

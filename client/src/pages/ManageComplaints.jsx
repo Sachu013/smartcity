@@ -61,7 +61,7 @@ const ManageComplaints = () => {
                     </div>
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-1.5 flex gap-1">
-                            {['all', 'pending', 'in-progress', 'resolved'].map((status) => (
+                            {['all', 'Pending', 'In Progress', 'Resolved'].map((status) => (
                                 <button
                                     key={status}
                                     onClick={() => setFilterStatus(status)}
@@ -135,18 +135,18 @@ const ManageComplaints = () => {
                                             </div>
                                         </td>
                                         <td className="px-8 py-7">
-                                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${c.status === 'resolved' ? 'bg-green-50 border-green-100 text-green-600' :
-                                                    c.status === 'in-progress' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-slate-50 border-slate-100 text-slate-400'
+                                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${c.status === 'Resolved' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                                                c.status === 'In Progress' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-slate-50 border-slate-100 text-slate-400'
                                                 }`}>
-                                                <div className={`w-1.5 h-1.5 rounded-full ${c.status === 'resolved' ? 'bg-green-500 animate-pulse' :
-                                                        c.status === 'in-progress' ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'
+                                                <div className={`w-1.5 h-1.5 rounded-full ${c.status === 'Resolved' ? 'bg-emerald-500 animate-pulse' :
+                                                    c.status === 'In Progress' ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'
                                                     }`}></div>
                                                 {c.status}
                                             </div>
                                         </td>
                                         <td className="px-8 py-7">
                                             <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest ${c.urgency === 'high' ? 'text-red-600' :
-                                                    c.urgency === 'medium' ? 'text-amber-500' : 'text-slate-400'
+                                                c.urgency === 'medium' ? 'text-amber-500' : 'text-slate-400'
                                                 }`}>
                                                 <ShieldCheck size={14} />
                                                 {c.urgency || 'Normal'}

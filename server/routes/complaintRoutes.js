@@ -5,18 +5,20 @@ const { protect, admin } = require('../middleware/authMiddleware');
 
 // Keywords for auto-categorization and urgency
 const categories = {
-    Road: ['pothole', 'street', 'road', 'asphalt', 'sidewalk'],
-    Water: ['leak', 'pipe', 'water', 'sewage', 'drain'],
-    Waste: ['trash', 'garbage', 'waste', 'dump', 'smell'],
-    Electricity: ['power', 'light', 'electric', 'outage', 'blackout'],
+    'Garbage': ['trash', 'garbage', 'waste', 'dump', 'smell'],
+    'Road Damage': ['pothole', 'street', 'road', 'asphalt', 'sidewalk'],
+    'Water Leakage': ['leak', 'pipe', 'water', 'sewage', 'drain'],
+    'Electricity': ['power', 'outage', 'blackout', 'transformer'],
+    'Street Light': ['street light', 'lamp', 'dark', 'bulb'],
 };
 
 const departments = {
-    Road: 'Public Works Department',
-    Water: 'Water Supply Department',
-    Waste: 'Sanitation Department',
-    Electricity: 'Power Department',
-    Other: 'General Administration',
+    'Garbage': 'Sanitation Department',
+    'Road Damage': 'Public Works Department',
+    'Water Leakage': 'Water Supply Department',
+    'Electricity': 'Power Department',
+    'Street Light': 'Electrical Department',
+    'Other': 'General Administration',
 };
 
 const urgencyKeywords = ['urgent', 'danger', 'immediate', 'emergency', 'dying', 'accident'];

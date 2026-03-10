@@ -29,10 +29,11 @@ const SubmitComplaint = () => {
     const [copied, setCopied] = useState(false);
 
     const categories = [
-        { name: 'Road', icon: '🛣️' },
-        { name: 'Water', icon: '💧' },
-        { name: 'Waste', icon: '🗑️' },
+        { name: 'Garbage', icon: '🗑️' },
+        { name: 'Road Damage', icon: '🛣️' },
+        { name: 'Water Leakage', icon: '💧' },
         { name: 'Electricity', icon: '⚡' },
+        { name: 'Street Light', icon: '💡' },
         { name: 'Other', icon: '📁' }
     ];
 

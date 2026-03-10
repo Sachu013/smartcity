@@ -118,8 +118,8 @@ const TrackComplaint = () => {
                                 <p className="text-slate-500 font-semibold text-sm">Real-time status feed</p>
                             </div>
                             <div className={`px-5 py-2 rounded-full font-black text-xs uppercase tracking-widest border-2 ${complaint.urgency === 'high' ? 'bg-red-50 border-red-100 text-red-600' :
-                                    complaint.urgency === 'medium' ? 'bg-amber-50 border-amber-100 text-amber-600' :
-                                        'bg-green-50 border-green-100 text-green-600'
+                                complaint.urgency === 'medium' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                                    'bg-green-50 border-green-100 text-green-600'
                                 }`}>
                                 {complaint.urgency} PRIORITY NODE
                             </div>
@@ -140,8 +140,8 @@ const TrackComplaint = () => {
                                     return (
                                         <div key={index} className="flex flex-col items-center group">
                                             <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center relative z-10 transition-all duration-500 border-4 ${isActive
-                                                    ? 'bg-primary-600 border-white text-white shadow-xl shadow-primary-200 scale-110'
-                                                    : 'bg-white border-slate-50 text-slate-300'
+                                                ? 'bg-primary-600 border-white text-white shadow-xl shadow-primary-200 scale-110'
+                                                : 'bg-white border-slate-50 text-slate-300'
                                                 }`}>
                                                 <step.icon size={24} />
                                             </div>
@@ -195,6 +195,18 @@ const TrackComplaint = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {complaint.adminResponse && (
+                                <div className="p-8 bg-primary-50 rounded-[2rem] border border-primary-100 flex gap-5">
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-primary-600 shadow-sm shrink-0">
+                                        <MessageSquare size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Official Admin Response</p>
+                                        <p className="text-slate-700 font-semibold leading-relaxed">{complaint.adminResponse}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-6">
